@@ -648,7 +648,7 @@ export default {
         categories: ['市政工程', '房建工程', '轨道交通', '水利工程', '能源工程'],
         constructionTypes: ['总承包', '专业分包', '劳务分包', '设计施工一体化'],
         stages: ['投标', '签约', '施工', '竣工', '结算'],
-        industryChains: ['建材', '设备', '施工', '设计', '运维']
+        industryChains: ['水运', '公路', '轨道交通', '机场', '建筑', '市政', '海洋工程', '生态环保', '绿色能源', '新基建']
       },
       // 筛选条件
       filters: {
@@ -673,7 +673,7 @@ export default {
           bidDate: '2023-08-15',
           startDate: '2023-10-01',
           amount: 128000,
-          industryChain: '设备',
+          industryChain: '轨道交通',
           hasEquipment: true,
           approvalStatus: 'approved' // 已审批
         },
@@ -688,7 +688,7 @@ export default {
           bidDate: '2024-01-20',
           startDate: '2024-03-15',
           amount: 35000,
-          industryChain: '建材',
+          industryChain: '市政',
           hasEquipment: false,
           approvalStatus: 'pending' // 审批中
         },
@@ -703,7 +703,7 @@ export default {
           bidDate: '2023-12-10',
           startDate: '2024-02-01',
           amount: 82000,
-          industryChain: '施工',
+          industryChain: '建筑',
           hasEquipment: false,
           approvalStatus: 'draft' // 未提交
         },
@@ -718,7 +718,7 @@ export default {
           bidDate: '2023-05-20',
           startDate: '2023-07-01',
           amount: 156000,
-          industryChain: '设计',
+          industryChain: '水运',
           hasEquipment: true,
           approvalStatus: 'approved' // 已审批
         },
@@ -733,7 +733,7 @@ export default {
           bidDate: '2023-03-15',
           startDate: '2023-05-01',
           amount: 238000,
-          industryChain: '运维',
+          industryChain: '建筑',
           hasEquipment: false,
           approvalStatus: 'approved' // 已审批
         }

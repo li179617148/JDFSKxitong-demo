@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import Home from '../views/Home.vue'
 import EquipmentStatistics from '../views/EquipmentStatistics.vue'
@@ -9,6 +9,16 @@ import ExpertApproval from '../components/ExpertApproval.vue'
 import ExpertMaintenance from '../components/ExpertMaintenance.vue'
 import LogisticsMonitoring from '../components/LogisticsMonitoring.vue'
 import LogisticsReporting from '../components/LogisticsReporting.vue'
+import LogisticsOverview from '../components/LogisticsOverview.vue'
+import ForwarderMaintenance from '../components/ForwarderMaintenance.vue'
+import SubcontractMaintenance from '../components/SubcontractMaintenance.vue'
+import SubcontractLogisticsMaintenance from '../components/SubcontractLogisticsMaintenance.vue'
+import SubcontractLogisticsTest from '../components/SubcontractLogisticsTest.vue'
+import ForwarderLogisticsMaintenance from '../components/ForwarderLogisticsMaintenance.vue'
+
+import StaffManagement from '../components/StaffManagement.vue'
+import DepartmentManagement from '../components/DepartmentManagement.vue'
+import RoleManagement from '../components/RoleManagement.vue'
 
 import MaterialEquipmentCategory from '../components/MaterialEquipmentCategory.vue'
 import PriceMaintenance from '../components/PriceMaintenance.vue'
@@ -92,6 +102,31 @@ const routes = [
     name: 'LogisticsReporting',
     component: LogisticsReporting
   },
+  {
+    path: '/logistics-overview',
+    name: 'LogisticsOverview',
+    component: LogisticsOverview
+  },
+  {
+    path: '/forwarder-maintenance',
+    name: 'ForwarderMaintenance',
+    component: ForwarderMaintenance
+  },
+  {
+    path: '/subcontract-maintenance',
+    name: 'SubcontractMaintenance',
+    component: SubcontractMaintenance
+  },
+  {
+    path: '/subcontract-logistics-maintenance',
+    name: 'SubcontractLogisticsMaintenance',
+    component: SubcontractLogisticsTest
+  },
+  {
+    path: '/forwarder-logistics-maintenance',
+    name: 'ForwarderLogisticsMaintenance',
+    component: ForwarderLogisticsMaintenance
+  },
 
   {
     path: '/material-equipment-category',
@@ -132,11 +167,26 @@ const routes = [
     path: '/partner-evaluation/add',
     name: 'PartnerEvaluationAdd',
     component: PartnerEvaluationMaintenance
+  },
+  {
+    path: '/staff-management',
+    name: 'StaffManagement',
+    component: StaffManagement
+  },
+  {
+    path: '/department-management',
+    name: 'DepartmentManagement',
+    component: DepartmentManagement
+  },
+  {
+    path: '/role-management',
+    name: 'RoleManagement',
+    component: RoleManagement
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 

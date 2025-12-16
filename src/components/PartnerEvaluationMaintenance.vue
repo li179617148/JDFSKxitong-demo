@@ -149,6 +149,38 @@ export default {
             fileName: '',
             file: null,
             remarks: ''
+          },
+          {
+            selected: false,
+            partnerName: '',
+            evaluationResult: '',
+            fileName: '',
+            file: null,
+            remarks: ''
+          },
+          {
+            selected: false,
+            partnerName: '',
+            evaluationResult: '',
+            fileName: '',
+            file: null,
+            remarks: ''
+          },
+          {
+            selected: false,
+            partnerName: '',
+            evaluationResult: '',
+            fileName: '',
+            file: null,
+            remarks: ''
+          },
+          {
+            selected: false,
+            partnerName: '',
+            evaluationResult: '',
+            fileName: '',
+            file: null,
+            remarks: ''
           }
         ]
       }

@@ -50,7 +50,7 @@ export default {
 <style scoped>
 .login-container {
   min-height: 100vh;
-  padding-top: 220px;
+  padding-top: 280px;
   background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   display: flex;
   align-items: flex-start;

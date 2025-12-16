@@ -28,14 +28,7 @@
             <option v-for="e in options.educations" :key="e" :value="e">{{ e }}</option>
           </select>
         </div>
-        <div class="filter-item">
-          <label>出生日期：</label>
-          <input v-model="filters.birthDateStart" type="date" placeholder="开始日期" />
-        </div>
-        <div class="filter-item">
-          <label>至：</label>
-          <input v-model="filters.birthDateEnd" type="date" placeholder="结束日期" />
-        </div>
+        
       </div>
       <div class="filter-actions">
           <button class="btn-primary" @click="handleQuery">查询</button>
@@ -85,6 +78,23 @@
           </tbody>
         </table>
       </div>
+    </div>
+
+    <!-- 分页控件 -->
+    <div class="pagination">
+      <button
+        @click="pagination.currentPage--"
+        :disabled="pagination.currentPage <= 1">
+        上一页
+      </button>
+      <span class="page-info">
+        第 {{ pagination.currentPage }} 页 / 共 {{ Math.ceil(filteredList.length / pagination.pageSize) }} 页
+      </span>
+      <button
+        @click="pagination.currentPage++"
+        :disabled="pagination.currentPage >= Math.ceil(filteredList.length / pagination.pageSize)">
+        下一页
+      </button>
     </div>
 
     <!-- 新增/编辑专家弹窗 -->
@@ -249,9 +259,7 @@ export default {
         name: '',
         specialty: '',
         title: '',
-        education: '',
-        birthDateStart: '',
-        birthDateEnd: ''
+        education: ''
       },
       // 原始数据
       rawList: [
@@ -348,6 +356,11 @@ export default {
         }
       ],
       displayList: [],
+      pagination: {
+        pageSize: 3,
+        currentPage: 1
+      },
+      filteredList: [],
       // 弹窗相关
       showModal: false,
       isEdit: false,
@@ -410,42 +423,61 @@ export default {
     }
   },
   created() {
-    this.displayList = this.rawList.slice(0, 7);
+    this.filteredList = [...this.rawList];
+    this.pagination = {
+      pageSize: 3,
+      currentPage: 1
+    };
+    this.updateDisplayList();
+    // 确保初始加载时执行查询以应用分页
+    this.handleQuery();
+    console.log('组件初始化:', {
+      initialDataCount: this.rawList.length,
+      paginationSettings: this.pagination
+    });
+  },
+  watch: {
+    'pagination.currentPage': 'updateDisplayList',
+    'pagination.pageSize': 'updateDisplayList'
   },
   methods: {
+    updateDisplayList() {
+      const startIndex = (this.pagination.currentPage - 1) * this.pagination.pageSize;
+      const endIndex = startIndex + this.pagination.pageSize;
+      this.displayList = this.filteredList.slice(startIndex, endIndex);
+      console.log('分页更新:', {
+        currentPage: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize,
+        startIndex,
+        endIndex,
+        totalItems: this.filteredList.length,
+        displayedItems: this.displayList.length
+      });
+    },
     handleQuery() {
       const f = this.filters;
-      let filteredList = this.rawList.filter((row) => {
+      this.filteredList = this.rawList.filter((row) => {
         const byName = f.name ? row.name.toLowerCase().includes(f.name.trim().toLowerCase()) : true;
         const bySpecialty = f.specialty ? row.specialty === f.specialty : true;
         const byTitle = f.title ? row.title === f.title : true;
         const byEducation = f.education ? row.education === f.education : true;
 
-        // 出生日期范围查询
-        let byBirthDate = true;
-        if (f.birthDateStart && row.birthDate) {
-          byBirthDate = row.birthDate >= f.birthDateStart;
-        }
-        if (byBirthDate && f.birthDateEnd && row.birthDate) {
-          byBirthDate = row.birthDate <= f.birthDateEnd;
-        }
-
-        return byName && bySpecialty && byTitle && byEducation && byBirthDate;
+        return byName && bySpecialty && byTitle && byEducation;
       });
       
-      // 限制显示结果为前7条
-      this.displayList = filteredList.slice(0, 7);
+      this.pagination.currentPage = 1;
+      this.updateDisplayList();
     },
     handleReset() {
       this.filters = {
         name: '',
         specialty: '',
         title: '',
-        education: '',
-        birthDateStart: '',
-        birthDateEnd: ''
+        education: ''
       };
-      this.displayList = this.rawList;
+      this.filteredList = [...this.rawList];
+      this.pagination.currentPage = 1;
+      this.updateDisplayList();
     },
     handleAdd() {
       this.resetForm();

@@ -702,7 +702,7 @@ export default {
         createTime: '2023-01-01',
         website: 'www.example.com',
         partnerAffiliation: '属地化',
-        industryChainType: ['建筑', '道桥'],
+        industryChainType: ['建筑', '公路'],
         businessScope: ['建筑工程施工总承包', '市政公用工程施工总承包'],
         partnerLevel: 'A级',
         companyScale: '1000',

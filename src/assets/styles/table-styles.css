@@ -51,7 +51,6 @@
 
 .data-table tbody tr:hover {
   background: #f8f9fa;
-  transform: scale(1.01);
 }
 
 /* 表格容器样式 */
@@ -89,8 +88,6 @@
 }
 
 .btn-primary:hover, .btn-edit:hover, .btn-view:hover, .btn-delete:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* 状态标签样式 */
@@ -149,7 +146,6 @@
 .pagination button:hover:not(:disabled) {
   background: #1890ff;
   color: white;
-  transform: translateY(-1px);
 }
 
 .pagination button:disabled {

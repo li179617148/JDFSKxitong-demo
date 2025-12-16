@@ -1,4 +1,4 @@
-wu<template>
+<template>
   <div class="home-container">
     <!-- 顶部导航栏 -->
     <header class="header" style="position: relative; z-index: 10; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
@@ -55,9 +55,6 @@ wu<template>
 
       <!-- 右侧内容区域 -->
       <main class="content-area">
-        <div class="content-header">
-          <h3>{{ currentMenuName }}</h3>
-        </div>
         <div class="content-body">
           <component :is="currentComponent" />
         </div>
@@ -87,9 +84,17 @@ import ProjectApproval from '../components/ProjectApproval.vue'
 import ExpertMaintenance from '../components/ExpertMaintenance.vue'
 import LogisticsMonitoring from '../components/LogisticsMonitoring.vue'
 import LogisticsReporting from '../components/LogisticsReporting.vue'
+import LogisticsOverview from '../components/LogisticsOverview.vue'
+import ForwarderMaintenance from '../components/ForwarderMaintenance.vue'
+import SubcontractMaintenance from '../components/SubcontractMaintenance.vue'
+import SubcontractLogisticsMaintenance from '../components/SubcontractLogisticsMaintenance.vue'
+import ForwarderLogisticsMaintenance from '../components/ForwarderLogisticsMaintenance.vue'
 import PriceMaintenance from '../components/PriceMaintenance.vue'
 import PriceAdd from '../components/PriceAdd.vue'
 import PartnerEvaluationList from '../components/PartnerEvaluationList.vue'
+import StaffManagement from '../components/StaffManagement.vue'
+import DepartmentManagement from '../components/DepartmentManagement.vue'
+import RoleManagement from '../components/RoleManagement.vue'
 
 export default {
   name: 'Home',
@@ -112,13 +117,21 @@ export default {
     ExpertMaintenance,
     LogisticsMonitoring,
     LogisticsReporting,
+    LogisticsOverview,
+    ForwarderMaintenance,
+    SubcontractMaintenance,
+    SubcontractLogisticsMaintenance,
+    ForwarderLogisticsMaintenance,
     PriceMaintenance,
     PriceAdd,
-    PartnerEvaluationList
+    PartnerEvaluationList,
+    StaffManagement,
+    DepartmentManagement,
+    RoleManagement
   },
   data() {
     return {
-      activeMenu: 'partner-maintenance', // 默认激活合作方维护菜单
+      activeMenu: 'material', // 默认激活价格查询菜单
       expandedMenus: new Set(['price']), // 默认只展开价格库管理
       showPriceAdd: false, // 控制新增页面显示
       menuItems: [
@@ -165,23 +178,26 @@ export default {
         {
           id: 'logistics',
           name: '物流监控管理',
-          component: 'LogisticsMonitoring',
+          component: 'LogisticsOverview',
           children: [
-            { id: 'logistics-monitoring', name: '物流监控', component: 'LogisticsMonitoring' },
-            { id: 'logistics-reporting', name: '物流监控填报', component: 'LogisticsReporting' }
+            { id: 'logistics-overview', name: '物流总览', component: 'LogisticsOverview' },
+            { id: 'forwarder-maintenance', name: '国际货运代理商维护', component: 'ForwarderMaintenance' },
+            { id: 'subcontract-logistics-maintenance', name: '包件物流维护', component: 'SubcontractLogisticsMaintenance' },
+            { id: 'forwarder-logistics-maintenance', name: '国际货运代理物流维护', component: 'ForwarderLogisticsMaintenance' }
           ]
-        }
+        },
+        // 系统管理功能已隐藏，后续再设计
+        // {
+        //   id: 'system',
+        //   name: '系统管理',
+        //   component: 'StaffManagement',
+        //   children: [
+        //     { id: 'staff-management', name: '人员管理', component: 'StaffManagement' },
+        //     { id: 'department-management', name: '部门管理', component: 'DepartmentManagement' },
+        //     { id: 'role-management', name: '角色管理', component: 'RoleManagement' }
+        //   ]
+        // }
       ]
-    }
-  },
-  created() {
-    // 处理URL参数，如果指定了menu参数，则设置对应的菜单
-    const urlParams = new URLSearchParams(window.location.search)
-    const menuParam = urlParams.get('menu')
-    if (menuParam && this.menuItems.some(item => 
-      item.id === menuParam || (item.children && item.children.some(child => child.id === menuParam))
-    )) {
-      this.activeMenu = menuParam
     }
   },
   created() {

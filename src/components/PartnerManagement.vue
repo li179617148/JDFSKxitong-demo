@@ -368,7 +368,7 @@
                   </div>
                   <div class="form-item">
                     <label>往来单位类型：</label>
-                    <input type="text" v-model="newPartner.partnerType" :disabled="isViewMode">
+                    <input type="text" v-model="newPartner.businessContactType" :disabled="isViewMode">
                   </div>
                   <div class="form-item">
                     <label>往来单位性质<span class="required">*</span>：</label>
@@ -424,7 +424,7 @@
                         <div
                           class="multi-select-input"
                           @click="togglePartnerTypeDropdown"
-                          :class="{ 'disabled': isViewMode }"
+                          :class="{ 'disabled': isViewMode && currentPartnerId }"
                         >
                           <div class="selected-items">
                             <span
@@ -447,7 +447,7 @@
                         </div>
 
                         <!-- 下拉选项 -->
-                        <div v-if="partnerTypeDropdownOpen && !isViewMode" class="dropdown-options">
+                        <div v-if="partnerTypeDropdownOpen" class="dropdown-options">
                           <div
                             v-for="option in availablePartnerTypes"
                             :key="option.value"
@@ -470,7 +470,7 @@
                         <div
                           class="multi-select-input"
                           @click="toggleIndustryChainDropdown"
-                          :class="{ 'disabled': isViewMode }"
+                          :class="{ 'disabled': isViewMode && currentPartnerId }"
                         >
                           <div class="selected-items">
                             <span
@@ -493,7 +493,7 @@
                         </div>
 
                         <!-- 下拉选项 -->
-                        <div v-if="industryChainDropdownOpen && !isViewMode" class="dropdown-options">
+                        <div v-if="industryChainDropdownOpen && (!isViewMode || !currentPartnerId)" class="dropdown-options">
                           <div
                             v-for="option in availableIndustryChainTypes"
                             :key="option.value"
@@ -518,8 +518,8 @@
                       <div class="multi-select-component">
                         <div
                           class="multi-select-input"
-                          @click="toggleDropdown"
-                          :class="{ 'disabled': isViewMode }"
+                          @click="toggleBusinessScopeDropdown"
+                          :class="{ 'disabled': isViewMode && currentPartnerId }"
                         >
                           <div class="selected-items">
                             <span
@@ -538,11 +538,11 @@
                               请选择经营范围
                             </span>
                           </div>
-                          <div class="dropdown-arrow" :class="{ 'active': dropdownOpen }"></div>
+                          <div class="dropdown-arrow" :class="{ 'active': businessScopeDropdownOpen }"></div>
                         </div>
 
                         <!-- 下拉选项 -->
-                        <div v-if="dropdownOpen && !isViewMode" class="dropdown-options">
+                        <div v-if="businessScopeDropdownOpen && (!isViewMode || !currentPartnerId)" class="dropdown-options">
                           <div
                             v-for="option in availableBusinessScopes"
                             :key="option.value"
@@ -1527,7 +1527,7 @@ export default {
         showDeleted: false
       },
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 3,
       countryOptions: ['中国','美国','英国','德国','法国','日本','韩国','印度','俄罗斯','巴西','其他'],
       showAddModal: false,
       isViewMode: false,
@@ -1540,7 +1540,7 @@ export default {
         { id: 'documents', name: '声明/证明材料' }
       ],
       businessScopeError: '',
-      dropdownOpen: false, // 控制下拉菜单显示状态
+      businessScopeDropdownOpen: false, // 控制经营范围下拉菜单显示状态
       industryChainDropdownOpen: false, // 控制产业链类型下拉菜单显示状态
       partnerTypeDropdownOpen: false, // 控制合作方类型下拉菜单显示状态
       searchPartnerTypeDropdownOpen: false, // 控制搜索合作方类型下拉菜单显示状态
@@ -1553,14 +1553,16 @@ export default {
         { value: '信息化类', label: '信息化类' }
       ],
       industryChainOptions: [
-        { value: '港口', label: '港口' },
+        { value: '水运', label: '水运' },
+        { value: '公路', label: '公路' },
+        { value: '轨道交通', label: '轨道交通' },
+        { value: '机场', label: '机场' },
         { value: '建筑', label: '建筑' },
-        { value: '道桥', label: '道桥' },
-        { value: '轨道', label: '轨道' },
+        { value: '市政', label: '市政' },
+        { value: '海洋工程', label: '海洋工程' },
         { value: '生态环保', label: '生态环保' },
-        { value: '城市综合开发', label: '城市综合开发' },
-        { value: '管网', label: '管网' },
-        { value: '绿色电力', label: '绿色电力' }
+        { value: '绿色能源', label: '绿色能源' },
+        { value: '新基建', label: '新基建' }
       ],
       newPartner: {
         // 基本信息
@@ -1571,6 +1573,7 @@ export default {
         partnerCategory: '',
         officeAddress: '',
         country: '',
+        businessContactType: '',
         partnerType: [],
         partnerNature: '',
         isCccSubordinate: '',
@@ -1633,7 +1636,7 @@ export default {
           id: 1,
           partnerType: ['施工类'],
           enterpriseName: '北京建工集团',
-          industryChainType: ['建筑', '道桥'],
+          industryChainType: ['建筑', '公路'],
           businessScope: ['建筑工程施工总承包', '市政公用工程施工总承包'],
           country: '中国',
           contactPerson: '张经理',
@@ -1685,7 +1688,7 @@ export default {
           id: 5,
           partnerType: ['信息化类'],
           enterpriseName: '天津监理公司',
-          industryChainType: ['绿色电力'],
+          industryChainType: ['绿色能源'],
           businessScope: ['计算机软件开发', '技术咨询', '技术服务'],
           country: '中国',
           contactPerson: '钱工',
@@ -1698,7 +1701,7 @@ export default {
           id: 6,
           partnerType: ['施工类'],
           enterpriseName: 'Siemens AG',
-          industryChainType: ['电气设备'],
+          industryChainType: ['新基建'],
           businessScope: ['工业自动化', '工业控制', '建筑电气'],
           country: '德国',
           contactPerson: 'Hans Schmidt',
@@ -1711,7 +1714,7 @@ export default {
           id: 7,
           partnerType: ['信息化类'],
           enterpriseName: 'Microsoft Corporation',
-          industryChainType: ['信息技术'],
+          industryChainType: ['新基建'],
           businessScope: ['软件服务', '云计算', '技术支持'],
           country: '美国',
           contactPerson: 'John Smith',
@@ -1724,7 +1727,7 @@ export default {
           id: 8,
           partnerType: ['勘察设计类'],
           enterpriseName: 'Toyo Engineering Corporation',
-          industryChainType: ['石油化工'],
+          industryChainType: ['海洋工程'],
           businessScope: ['工程咨询', '工程设计', '项目管理'],
           country: '日本',
           contactPerson: '田中健一',
@@ -1750,7 +1753,7 @@ export default {
           id: 10,
           partnerType: ['工程咨询类'],
           enterpriseName: 'Arup Group',
-          industryChainType: ['建筑', '交通'],
+          industryChainType: ['建筑', '市政'],
           businessScope: ['工程咨询', '结构设计', '环境工程'],
           country: '英国',
           contactPerson: 'Robert Brown',
@@ -1763,7 +1766,7 @@ export default {
           id: 11,
           partnerType: ['信息化类'],
           enterpriseName: 'Samsung SDS',
-          industryChainType: ['信息技术'],
+          industryChainType: ['新基建'],
           businessScope: ['IT服务', '数字化转型', '云计算'],
           country: '韩国',
           contactPerson: 'Kim Lee',
@@ -1776,7 +1779,7 @@ export default {
           id: 12,
           partnerType: ['施工类'],
           enterpriseName: 'Larsen & Toubro',
-          industryChainType: ['建筑', '机械'],
+          industryChainType: ['建筑', '水运'],
           businessScope: ['工程总承包', '基建工程', '工业项目'],
           country: '印度',
           contactPerson: 'Raj Sharma',
@@ -1835,17 +1838,57 @@ export default {
         return true
       })
 
-      // 限制显示结果为前7条
-      return filtered.slice(0, 7)
+      // 根据当前页码和每页条数进行分页
+      const start = (this.currentPage - 1) * this.pageSize
+      const end = start + this.pageSize
+      return filtered.slice(start, end)
     },
     totalPages() {
-      const total = this.partnerList.filter(partner => {
+      const filtered = this.partnerList.filter(partner => {
+        // 根据显示已删除选项过滤
         if (!this.searchParams.showDeleted && partner.status === 'deleted') {
           return false
         }
+
+        // 根据合作方类型过滤
+        if (this.searchParams.partnerType && this.searchParams.partnerType.length > 0) {
+          if (!partner.partnerType || !partner.partnerType.some(type => this.searchParams.partnerType.includes(type))) {
+            return false
+          }
+        }
+
+        // 根据产业链类型过滤
+        if (this.searchParams.industryChainType && this.searchParams.industryChainType.length > 0) {
+          if (!partner.industryChainType || !partner.industryChainType.some(chain => this.searchParams.industryChainType.includes(chain))) {
+            return false
+          }
+        }
+
+        // 根据经营范围过滤
+        if (this.searchParams.businessScope && this.searchParams.businessScope.length > 0) {
+          if (!partner.businessScope || !partner.businessScope.some(scope => this.searchParams.businessScope.includes(scope))) {
+            return false
+          }
+        }
+
+        // 根据合作方名称过滤
+        if (this.searchParams.partnerName && !(partner.enterpriseName || '').includes(this.searchParams.partnerName)) {
+          return false
+        }
+
+        // 根据联系人过滤
+        if (this.searchParams.contactPerson && !partner.contactPerson.includes(this.searchParams.contactPerson)) {
+          return false
+        }
+
+        // 根据供货名称过滤
+        if (this.searchParams.supplyName && !partner.supplyName.includes(this.searchParams.supplyName)) {
+          return false
+        }
+
         return true
-      }).length
-      return Math.ceil(total / this.pageSize)
+      })
+      return Math.ceil(filtered.length / this.pageSize)
     },
     // 检查是否有选中的证照信息
     hasSelectedLicenseInfo() {
@@ -1898,36 +1941,54 @@ export default {
     },
     // 获取可选的经营范围选项（排除已选中的）
     availableBusinessScopes() {
+      if (!this.newPartner.businessScope || !Array.isArray(this.newPartner.businessScope)) {
+        return this.businessScopeOptions
+      }
       return this.businessScopeOptions.filter(option =>
         !this.newPartner.businessScope.includes(option.value)
       )
     },
     // 获取可选的合作方类型选项（排除已选中的）
     availablePartnerTypes() {
+      if (!this.newPartner.partnerType || !Array.isArray(this.newPartner.partnerType)) {
+        return this.partnerTypeOptions
+      }
       return this.partnerTypeOptions.filter(option =>
         !this.newPartner.partnerType.includes(option.value)
       )
     },
     // 获取可选的搜索合作方类型选项（排除已选中的）
     availableSearchPartnerTypes() {
+      if (!this.searchParams.partnerType || !Array.isArray(this.searchParams.partnerType)) {
+        return this.partnerTypeOptions
+      }
       return this.partnerTypeOptions.filter(option =>
         !this.searchParams.partnerType.includes(option.value)
       )
     },
     // 获取可选的产业链类型选项（排除已选中的）
     availableIndustryChainTypes() {
+      if (!this.newPartner.industryChainType || !Array.isArray(this.newPartner.industryChainType)) {
+        return this.industryChainOptions
+      }
       return this.industryChainOptions.filter(option =>
         !this.newPartner.industryChainType.includes(option.value)
       )
     },
     // 获取可选的搜索产业链类型选项（排除已选中的）
     availableSearchIndustryChainTypes() {
+      if (!this.searchParams.industryChainType || !Array.isArray(this.searchParams.industryChainType)) {
+        return this.industryChainOptions
+      }
       return this.industryChainOptions.filter(option =>
         !this.searchParams.industryChainType.includes(option.value)
       )
     },
     // 获取可选的搜索经营范围选项（排除已选中的）
     availableSearchBusinessScopes() {
+      if (!this.searchParams.businessScope || !Array.isArray(this.searchParams.businessScope)) {
+        return this.businessScopeOptions
+      }
       return this.businessScopeOptions.filter(option =>
         !this.searchParams.businessScope.includes(option.value)
       )
@@ -2083,6 +2144,7 @@ export default {
     },
     handleAdd() {
       this.showAddModal = true
+      this.isViewMode = false
     },
     validateBusinessScope() {
       if (this.newPartner.businessScope.length === 0) {
@@ -2097,7 +2159,7 @@ export default {
       this.showAddModal = false
       this.isViewMode = false
       this.currentPartnerId = null
-      this.dropdownOpen = false // 关闭下拉菜单
+      this.businessScopeDropdownOpen = false // 关闭经营范围下拉菜单
       this.industryChainDropdownOpen = false // 关闭产业链类型下拉菜单
       this.partnerTypeDropdownOpen = false // 关闭合作方类型下拉菜单
       this.resetNewPartner()
@@ -2112,6 +2174,7 @@ export default {
         partnerCategory: '',
         officeAddress: '',
         country: '',
+        businessContactType: '',
         partnerType: [],
         partnerNature: '',
         isCccSubordinate: '',
@@ -2182,17 +2245,18 @@ export default {
         this.businessScopeError = '请至少选择一项经营范围'
       }
     },
-    // 切换下拉菜单显示状态
-    toggleDropdown() {
-      if (!this.isViewMode) {
-        this.dropdownOpen = !this.dropdownOpen
+    // 切换经营范围下拉菜单显示状态
+    toggleBusinessScopeDropdown() {
+      // 在新增模式下总是可以切换下拉菜单
+      if (!this.isViewMode || !this.currentPartnerId) {
+        this.businessScopeDropdownOpen = !this.businessScopeDropdownOpen
       }
     },
     // 选择经营范围
     selectBusinessScope(option) {
       this.newPartner.businessScope.push(option.value)
       this.businessScopeError = ''
-      this.dropdownOpen = false
+      this.businessScopeDropdownOpen = false
     },
     // 根据value获取label
     getBusinessScopeLabel(value) {
@@ -2201,7 +2265,8 @@ export default {
     },
     // 切换产业链类型下拉菜单显示状态
     toggleIndustryChainDropdown() {
-      if (!this.isViewMode) {
+      // 在新增模式下总是可以切换下拉菜单
+      if (!this.isViewMode || !this.currentPartnerId) {
         this.industryChainDropdownOpen = !this.industryChainDropdownOpen
       }
     },
@@ -2221,7 +2286,8 @@ export default {
     },
     // 切换合作方类型下拉菜单显示状态
     togglePartnerTypeDropdown() {
-      if (!this.isViewMode) {
+      // 在新增模式下总是可以切换下拉菜单
+      if (!this.isViewMode || !this.currentPartnerId) {
         this.partnerTypeDropdownOpen = !this.partnerTypeDropdownOpen
       }
     },
@@ -2573,7 +2639,7 @@ export default {
           partnerAffiliation: '属地化',
           parentEnterprise: '中国交建',
           isCccSubordinate: '是',
-          partnerType: '供应商',
+          partnerType: ['供应商'],
           country: '中国',
           legalRepresentative: '张三',
           registeredCapital: '5000',
@@ -2656,7 +2722,7 @@ export default {
           partnerAffiliation: '总部',
           parentEnterprise: '',
           isCccSubordinate: '否',
-          partnerType: '设计单位',
+          partnerType: ['设计单位'],
           country: '中国',
           legalRepresentative: '李四',
           registeredCapital: '3000',
@@ -2738,30 +2804,44 @@ export default {
     },
     // 点击外部关闭下拉菜单
     handleClickOutside(event) {
-      // 处理经营范围下拉菜单
-      const businessScopeMultiSelect = this.$el.querySelector('.business-scope-dropdown .multi-select-component')
-      if (businessScopeMultiSelect && !businessScopeMultiSelect.contains(event.target)) {
-        this.dropdownOpen = false
+      const isOutside = (element) => {
+        return element && !element.contains(event.target)
       }
 
-      // 处理产业链类型下拉菜单
-      const industryChainMultiSelect = this.$el.querySelector('.industry-chain-dropdown .multi-select-component')
-      if (industryChainMultiSelect && !industryChainMultiSelect.contains(event.target)) {
-        this.industryChainDropdownOpen = false
-      }
-
-      // 处理合作方类型下拉菜单
-      const partnerTypeMultiSelect = this.$el.querySelector('.partner-type-dropdown .multi-select-component')
-      if (partnerTypeMultiSelect && !partnerTypeMultiSelect.contains(event.target)) {
-        this.partnerTypeDropdownOpen = false
-      }
-
-      // 处理搜索区域下拉菜单
+      // 获取搜索区域和弹窗的容器元素
       const searchArea = this.$el.querySelector('.search-area')
-      if (searchArea && !searchArea.contains(event.target)) {
-        this.searchPartnerTypeDropdownOpen = false
-        this.searchIndustryChainDropdownOpen = false
-        this.searchBusinessScopeDropdownOpen = false
+      const modal = this.$el.querySelector('.partner-modal-content')
+
+      // 处理搜索区域的下拉菜单
+      if (searchArea) {
+        const searchPartnerTypeEl = searchArea.querySelector('.partner-type-dropdown .multi-select-component')
+        if (isOutside(searchPartnerTypeEl)) {
+          this.searchPartnerTypeDropdownOpen = false
+        }
+        const searchIndustryChainEl = searchArea.querySelector('.industry-chain-dropdown .multi-select-component')
+        if (isOutside(searchIndustryChainEl)) {
+          this.searchIndustryChainDropdownOpen = false
+        }
+        const searchBusinessScopeEl = searchArea.querySelector('.business-scope-dropdown .multi-select-component')
+        if (isOutside(searchBusinessScopeEl)) {
+          this.searchBusinessScopeDropdownOpen = false
+        }
+      }
+
+      // 处理弹窗内的下拉菜单
+      if (modal) {
+        const modalPartnerTypeEl = modal.querySelector('.partner-type-dropdown .multi-select-component')
+        if (isOutside(modalPartnerTypeEl)) {
+          this.partnerTypeDropdownOpen = false
+        }
+        const modalIndustryChainEl = modal.querySelector('.industry-chain-dropdown .multi-select-component')
+        if (isOutside(modalIndustryChainEl)) {
+          this.industryChainDropdownOpen = false
+        }
+        const modalBusinessScopeEl = modal.querySelector('.business-scope-dropdown .multi-select-component')
+        if (isOutside(modalBusinessScopeEl)) {
+          this.businessScopeDropdownOpen = false
+        }
       }
     },
     // 联系人管理方法
@@ -4144,7 +4224,7 @@ export default {
   border-radius: 0 0 4px 4px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 9999;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
 }

@@ -2,12 +2,12 @@
   <div class="price-maintenance">
 
     <!-- 新增/编辑弹窗 -->
-    <div class="modal" v-if="showModal">
+    <div class="modal" v-if="showModal && !viewMode">
       <div class="modal-content" style="width: 800px; max-height: 90vh;">
         <div class="modal-header">
           <h3>{{ isEdit ? '编辑价格' : '新增价格' }}</h3>
           <div class="header-actions">
-            <button class="btn-primary" @click="handleSave">保存</button>
+            <button class="btn-primary" @click="handleSave" v-if="isEdit">保存</button>
             <button class="btn-primary" @click="handleSubmit" v-if="!isEdit">提交审批</button>
             <button class="btn-secondary" @click="closeModal">取消</button>
           </div>
@@ -47,6 +47,107 @@
               </div>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 查看弹窗 - 使用PriceAdd的完整表单结构 -->
+    <div class="modal" v-if="showModal && viewMode">
+      <div class="modal-content" style="width: 95%; max-height: 90vh; height: 90vh;">
+        <div class="modal-header">
+          <h3>价格详情</h3>
+          <div class="header-actions">
+            <button class="btn-secondary" @click="closeModal">关闭</button>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 0; overflow-y: auto; height: calc(90vh - 120px);">
+          <div class="price-add-view">
+            <!-- 填报信息区域 -->
+            <div class="form-section report-info-section">
+              <h3 class="section-title">填报信息</h3>
+              <div class="report-info-row">
+                <div class="form-item inline">
+                  <label>填报日期：</label>
+                  <input type="date" v-model="viewData.reportDate" disabled>
+                </div>
+                <div class="form-item inline">
+                  <label>填报人：</label>
+                  <input type="text" v-model="viewData.reporter" disabled>
+                </div>
+              </div>
+            </div>
+
+            <!-- 价格维护表单区域 -->
+            <div class="form-section">
+              <h3 class="section-title">价格维护</h3>
+              
+              <!-- 完整价格信息表格 -->
+              <div class="price-table-section">
+                <div class="table-header">
+                  <h4>价格信息清单</h4>
+                </div>
+                
+                <div class="table-container">
+                  <table class="equipment-table">
+                    <thead>
+                      <tr>
+                        <th>序号</th>
+                        <th>一级分类</th>
+                        <th>二级分类</th>
+                        <th>三级分类</th>
+                        <th>四级分类</th>
+                        <th>装备名称</th>
+                        <th>物资装备编码</th>
+                        <th>单位</th>
+                        <th>型号</th>
+                        <th>规格</th>
+                        <th>出厂价EXW（元）</th>
+                        <th>国内港口车板交货价（元）</th>
+                        <th>价格采集时间</th>
+                        <th>币种</th>
+                        <th>数据来源</th>
+                        <th>项目名称</th>
+                        <th>合作方名称</th>
+                        <th>附件</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, index) in viewData.equipmentList" :key="index">
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ item.level1Category || '-' }}</td>
+                        <td>{{ item.level2Category || '-' }}</td>
+                        <td>{{ item.level3Category || '-' }}</td>
+                        <td>{{ item.level4Category || '-' }}</td>
+                        <td>{{ item.equipmentName || '-' }}</td>
+                        <td>{{ item.equipmentCode || '-' }}</td>
+                        <td>{{ item.unit || '-' }}</td>
+                        <td>{{ item.model || '-' }}</td>
+                        <td>{{ item.specification || '-' }}</td>
+                        <td>{{ item.exwPrice || '-' }}</td>
+                        <td>{{ item.deliveryPrice || '-' }}</td>
+                        <td>{{ item.collectionTime || '-' }}</td>
+                        <td>{{ item.currency || '-' }}</td>
+                        <td>{{ item.dataSource || '-' }}</td>
+                        <td>{{ item.projectName || '-' }}</td>
+                        <td>{{ item.partnerName || '-' }}</td>
+                        <td>
+                          <div class="file-list" v-if="item.attachments && item.attachments.length > 0">
+                            <div class="file-item" v-for="(file, fileIndex) in item.attachments" :key="fileIndex">
+                              <span>{{ file.name }}</span>
+                            </div>
+                          </div>
+                          <span v-else>-</span>
+                        </td>
+                      </tr>
+                      <tr v-if="viewData.equipmentList.length === 0">
+                        <td colspan="18" class="empty-row">暂无装备数据</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -127,8 +228,14 @@ export default {
         price: '',
         priceDescription: ''
       },
+      viewData: {
+        reportDate: '',
+        reporter: '',
+        equipmentList: []
+      },
       showModal: false,
       isEdit: false,
+      viewMode: false,
       currentPage: 1,
       pageSize: 10,
       totalItems: 5,
@@ -218,8 +325,38 @@ export default {
     },
     
     handleView(item) {
-      console.log('查看审批：', item)
-      // 这里可以添加查看详情的逻辑
+      // 查看模式 - 显示类似新增页面的完整表单，但只读且无提交/保存按钮
+      this.viewData = {
+        reportDate: item.submitDate || new Date().toISOString().split('T')[0],
+        reporter: item.submitter || '未知',
+        equipmentList: [{
+          collectionTime: item.submitDate || new Date().toISOString().split('T')[0],
+          currency: 'CNY',
+          dataSource: '实际采购价格',
+          projectName: item.projectName || item.id === 1 ? '北京地铁10号线项目' : 
+                         item.id === 2 ? '上海浦东机场扩建项目' : 
+                         item.id === 3 ? '深圳湾科技园区建设项目' : 
+                         item.id === 4 ? '广州城市轨道交通项目' : '成都天府国际机场项目',
+          partnerName: item.submitter || item.id === 1 ? '中铁建集团' : 
+                        item.id === 2 ? '中交集团' : 
+                        item.id === 3 ? '中建集团' : 
+                        item.id === 4 ? '中国中铁' : '中国铁建',
+          level1Category: 'mechanical',
+          level2Category: '地基工程',
+          level3Category: '桩基工程',
+          level4Category: '钻孔灌注桩',
+          equipmentName: item.projectName || '示例装备',
+          equipmentCode: 'EQ' + item.id,
+          unit: item.unit || '台',
+          model: 'Model-' + item.id,
+          specification: item.specification || '规格型号-' + item.id,
+          exwPrice: item.price || Math.floor(Math.random() * 100000) + 10000,
+          deliveryPrice: (item.price ? item.price * 1.1 : Math.floor(Math.random() * 110000) + 11000),
+          attachments: []
+        }]
+      };
+      this.viewMode = true;
+      this.showModal = true;
     },
     
     handleApprove(item) {
@@ -286,6 +423,7 @@ export default {
     closeModal() {
       this.showModal = false
       this.isEdit = false
+      this.viewMode = false
     },
     
     getApprovalStatusClass(status) {
@@ -681,5 +819,145 @@ export default {
 
 .price-add-embedded .btn-close:hover {
   background: #a6a9ad;
+}
+
+/* 查看模式样式 */
+.price-add-view {
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+.price-add-view .form-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.price-add-view .section-title {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 2px solid #409eff;
+  padding-bottom: 10px;
+}
+
+.price-add-view .report-info-section .report-info-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.price-add-view .report-info-section .form-item.inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.price-add-view .report-info-section .form-item.inline label {
+  margin-bottom: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.price-add-view .report-info-section .form-item.inline input {
+  width: auto;
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+.price-add-view .equipment-table-section {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.price-add-view .table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.price-add-view .table-header h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.price-add-view .table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: white;
+  max-height: 400px;
+}
+
+.price-add-view .equipment-table {
+  min-width: 1800px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.price-add-view .equipment-table th {
+  background-color: #409eff;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 14px 8px;
+  border: 1px solid #409eff;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+}
+
+.price-add-view .equipment-table td {
+  padding: 10px 8px;
+  border: 1px solid #ebeef5;
+  text-align: center;
+  white-space: nowrap;
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+.price-add-view .equipment-table tr:hover td {
+  background-color: #f0f7ff;
+}
+
+.price-add-view .empty-row {
+  text-align: center;
+  color: #909399;
+  font-style: italic;
+}
+
+.price-add-view .file-list {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.price-add-view .file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
 }
 </style>
